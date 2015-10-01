@@ -15,6 +15,7 @@ Socket programming in Python
 import socket    # Basic TCP/IP communication on the internet
 import random    # To pick a port at random, giving us some chance to pick a port not in use
 import _thread   # Response computation runs concurrently with main program 
+import os
 
 
 def listen(portnum):
@@ -57,6 +58,7 @@ CAT = """
    """
 
 
+
 def respond(sock):
     """
     Respond (only) to GET
@@ -69,10 +71,18 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        transmit("HTTP/1.0 200 OK\n\n", sock)
+      try:
+        web = open('trivia.html').read()
+        transmit("HTTP/1.0 200 OK \n\n", sock)
+        transmit(web, sock)
+      except:
+        error = "Error 404 page is not exist"
+        transmit(error, sock)
         transmit(CAT, sock)
+    
     else:
-        transmit("\nI don't handle this request: {}\n".format(request), sock)
+      transmit("\nI don't handle this request: {}\n".format(request), sock)
+
 
     sock.close()
 
@@ -92,6 +102,7 @@ def main():
     print("Listening on port {}".format(port))
     print("Socket is {}".format(sock))
     serve(sock, respond)
+
 
 main()
     
